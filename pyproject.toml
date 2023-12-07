@@ -2,7 +2,7 @@
 name = "cxdupload"
 version = "1.1.0"
 description = "Multithreaded upload tool for Cisco TAC Cases via CXD"
-authors = ["Chad A Simmons <chad.simmons@gmail.com>"]
+authors = ["Chad A Simmons <chad.simmons@member.fsf.org>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
