@@ -26,7 +26,9 @@ def main() -> None:
         else:
             return_code: int = dir_upload(args.dir, auth, args.threads)
             if args.stats:
-                print_stats(get_dir_size(args.dir), start_time)
+                print(
+                    f'Uploaded {format_size(size := get_dir_size(args.dir), binary=True)} in {format_timespan(elapsed_time := time() - start_time)} at an average rate of {format_size(round(size / elapsed_time), binary=True)}/s'
+                )
             sys.exit(None if return_code == 201 else return_code)
     else:
         if not args.file.is_file():
@@ -123,13 +125,6 @@ def get_dir_size(path: str) -> int:
     #       elif file.is_dir():
     #           dir_size += get_dir_size(file.path)
     return dir_size
-
-
-def print_stats(size: int, start_time: float) -> None:
-    elapsed_time: float = time() - start_time
-    print(
-        f'Uploaded {format_size(size, binary=True)} in {format_timespan(elapsed_time)} at an average rate of {format_size(round(size / elapsed_time), binary=True)}/s')
-    return
 
 
 if __name__ == '__main__':
