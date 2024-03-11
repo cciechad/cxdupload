@@ -29,8 +29,7 @@ def main() -> None:
                 print(
                     f'Transferred {format_size(size := get_dir_size(args.dir), binary=True)} in '
                     f'{format_timespan(elapsed_time := time() - start_time)} at an average rate of '
-                    f'{format_size(round(size / elapsed_time), binary=True)}/s'
-                )
+                    f'{format_size(round(size / elapsed_time), binary=True)}/s')
     else:
         if not args.file.is_file():
             print(f'{args.file} is not a file.')
@@ -39,10 +38,7 @@ def main() -> None:
             global spinner
             with yaspin(Spinners.material, text='Uploading --- Elapsed Time', color='green', timer=True) as spinner:
                 return_code: int = file_upload(args.file, auth)
-                if return_code == 201:
-                    spinner.ok("✔ ")
-                else:
-                    spinner.fail("💥 ")
+                spinner.ok("✔ ") if return_code == 201 else spinner.fail("💥 ")
     sys.exit(None if return_code == 201 else return_code)
 
 
