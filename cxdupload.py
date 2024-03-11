@@ -99,10 +99,10 @@ def dir_upload(send_dir: str, auth: HTTPBasicAuth, threads: int) -> int:
     global spinner
     with yaspin(Spinners.material, text='Uploading', color='green', timer=True) as spinner:
         with cf.ThreadPoolExecutor(max_workers=threads, thread_name_prefix='cxd_put') as executor:
-            futures: list[cf.Future] = [executor.submit(file_upload, file.path, auth)
-                                        for file in os.scandir(send_dir) if file.is_file()]
             spinner.text = (
                 f'{(files_complete := 0)} of {(total_files := len(os.listdir(send_dir)))} complete - Elapsed Time')
+            futures: list[cf.Future] = [executor.submit(file_upload, file.path, auth)
+                                        for file in os.scandir(send_dir) if file.is_file()]
             for future in cf.as_completed(futures):
                 if future.result() == 201:
                     files_complete += 1
