@@ -26,10 +26,9 @@ def main() -> None:
         else:
             return_code: int = dir_upload(args.dir, auth, args.threads)
             if args.stats:
-                print(
-                    f'Transferred {format_size(size := get_dir_size(args.dir), binary=True)} in '
-                    f'{format_timespan(elapsed_time := time() - start_time)} at an average rate of '
-                    f'{format_size(round(size / elapsed_time), binary=True)}/s')
+                print(f'Transferred {format_size(size := get_dir_size(args.dir), binary=True)} in '
+                      f'{format_timespan(elapsed_time := time() - start_time)} at an average rate of '
+                      f'{format_size(round(size / elapsed_time), binary=True)}/s')
     else:
         if not args.file.is_file():
             print(f'{args.file} is not a file.')
@@ -44,7 +43,7 @@ def main() -> None:
 
 def parse_args() -> argparse.Namespace:
     parser: argparse.ArgumentParser = argparse.ArgumentParser(
-        description="Upload files or directories to a TAC case via CXD",
+        description="Upload files or directories to a Cisco TAC case via CXD",
         epilog="Case, token and either file or dir arguments are required")
     parser.add_argument('-s', '--stats', help='Print detailed stats upon exit', action='store_true')
     parser.add_argument('-p', '--threads', help='Number of threads', default=4, type=int, choices=range(1, 9))
@@ -53,8 +52,6 @@ def parse_args() -> argparse.Namespace:
     file_dir = parser.add_mutually_exclusive_group(required=True)
     file_dir.add_argument('-f', '--file', help='A single file to attach', type=lambda p: Path(p).absolute())
     file_dir.add_argument('-d', '--dir', help='Directory to attach', type=lambda p: Path(p).absolute())
-    # noinspection SpellCheckingInspection
-    parser.add_argument('--version', action='version', version='%(prog)s version 1.1')
     return parser.parse_args()
 
 
@@ -68,15 +65,15 @@ def file_upload(send_file: str, auth: HTTPBasicAuth) -> int:
         except requests.ConnectTimeout:
             spinner.write(f'Upload thread connect timeout {base_send_file}')
             spinner.color = 'red'
-            return 1000
+            return 10
         except IOError as e:
             spinner.write(f'IOError: {base_send_file} - {e}')
             spinner.color = 'red'
-            return 1001
+            return 11
         except requests.exceptions as e:
             spinner.write(f'Upload thread failed {base_send_file} - {e}')
             spinner.color = 'red'
-            return 1002
+            return 12
     if response.status_code == 201:
         spinner.write(f'{base_send_file} uploaded successfully')
         if spinner.color == 'red':
@@ -108,7 +105,7 @@ def dir_upload(send_dir: str, auth: HTTPBasicAuth, threads: int) -> int:
             return 201
         else:
             spinner.fail("💥 ")
-            return 1000
+            return 13
 
 
 def get_dir_size(path: str) -> int:
