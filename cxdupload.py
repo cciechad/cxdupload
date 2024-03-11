@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 import argparse
 import os
 import sys
@@ -12,7 +12,7 @@ from yaspin import yaspin
 from yaspin.core import Yaspin  # only needed for type hinting
 from yaspin.spinners import Spinners
 
-spinner: Yaspin  # initialize sp as global terminal spinner
+spinner: Yaspin  # initialize global terminal spinner
 
 
 def main() -> None:
@@ -27,9 +27,10 @@ def main() -> None:
             return_code: int = dir_upload(args.dir, auth, args.threads)
             if args.stats:
                 print(
-                    f'Uploaded {format_size(size := get_dir_size(args.dir), binary=True)} in {format_timespan(elapsed_time := time() - start_time)} at an average rate of {format_size(round(size / elapsed_time), binary=True)}/s'
+                    f'Transferred {format_size(size := get_dir_size(args.dir), binary=True)} in '
+                    f'{format_timespan(elapsed_time := time() - start_time)} at an average rate of '
+                    f'{format_size(round(size / elapsed_time), binary=True)}/s'
                 )
-            sys.exit(None if return_code == 201 else return_code)
     else:
         if not args.file.is_file():
             print(f'{args.file} is not a file.')
@@ -42,7 +43,7 @@ def main() -> None:
                     spinner.ok("✔ ")
                 else:
                     spinner.fail("💥 ")
-            sys.exit(None if return_code == 201 else return_code)
+    sys.exit(None if return_code == 201 else return_code)
 
 
 def parse_args() -> argparse.Namespace:
@@ -98,16 +99,14 @@ def dir_upload(send_dir: str, auth: HTTPBasicAuth, threads: int) -> int:
     global spinner
     with yaspin(Spinners.material, text='Uploading', color='green', timer=True) as spinner:
         with cf.ThreadPoolExecutor(max_workers=threads, thread_name_prefix='cxd_put') as executor:
-            futures: list[cf.Future] = []
-            spinner.text = f'Completed {(files_complete := 0)} of {(total_files := len(os.listdir(send_dir)))} files - Elapsed Time'
-            with os.scandir(send_dir) as files:
-                for file in files:
-                    if file.is_file():
-                        futures.append(executor.submit(file_upload, file.path, auth))
+            futures: list[cf.Future] = [executor.submit(file_upload, file.path, auth)
+                                        for file in os.scandir(send_dir) if file.is_file()]
+            spinner.text = (
+                f'{(files_complete := 0)} of {(total_files := len(os.listdir(send_dir)))} complete - Elapsed Time')
             for future in cf.as_completed(futures):
                 if future.result() == 201:
                     files_complete += 1
-                    spinner.text = f'Completed {files_complete} of {total_files} files - Elapsed Time'
+                    spinner.text = f'{files_complete} of {total_files} complete - Elapsed Time'
         if files_complete == total_files:
             spinner.ok("✔ ")
             return 201
